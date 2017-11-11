@@ -1,4 +1,8 @@
-src/Enclave_t.c
-src/Enclave_t.h
-src/Enclave_u.c
-src/Enclave_u.h
+src/*_t.c
+src/*_t.h
+src/*_u.c
+src/*_u.h
+*_u.c
+*_u.h
+*_t.c
+*_t.h
