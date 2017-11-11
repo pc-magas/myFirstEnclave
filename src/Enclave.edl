@@ -1,0 +1,10 @@
+enclave {
+
+  trusted {
+    public function sum([in] int *a, [in] int *b, [out] int *sum);
+  };
+
+  untrusted {
+
+  };
+};
