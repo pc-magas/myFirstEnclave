@@ -10,7 +10,7 @@ It is supposed to generate a library that
 1) Generate the C bindings with :
 
 ```bash
-sgx_edger8r ./src/Enclave.edl
+cd ./src/ && sgx_edger8r Enclave.edl && cd ..
 ```
 
 2) I have no idea what to do :(
