@@ -44,6 +44,9 @@ else
 endif
 Crypto_Library_Name := sgx_tcrypto
 
+
+Enclave_Cpp_Files := ./src/Enclave.cpp
+
 # Enclave_Include_Paths := -IInclude -IEnclave -I$(SGX_SDK)/include -I$(SGX_SDK)/include/tlibc -I$(SGX_SDK)/include/stlport
 Enclave_Include_Paths := -IEnclave -I$(SGX_SDK)/include -I$(SGX_SDK)/include/tlibc -I$(SGX_SDK)/include/stlport
 
@@ -57,6 +60,7 @@ Enclave_Link_Flags := $(SGX_COMMON_CFLAGS) -Wl,--no-undefined -nostdlib -nodefau
 	-Wl,--defsym,__ImageBase=0
 	# -Wl,--version-script=Enclave/Enclave.lds
 
+Enclave_Cpp_Objects := $(Enclave_Cpp_Files:.cpp=.o)
 
 # Investigate them furher
 Enclave_Name := ./bin/enclave.so
