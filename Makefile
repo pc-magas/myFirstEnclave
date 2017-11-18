@@ -85,15 +85,15 @@ all: $(Enclave_Name)
 	@$(CC) $(Enclave_C_Flags) -c $< -o $@
 	@echo "BUILD EDGE FUNCTIONS   <=  $<"
 
-./bin/Enclave.o: ./src/%.cpp
+./bin/Enclave.o: ./src/Enclave.cpp
 	@$(CXX) $(Enclave_Cpp_Flags) -c $< -o $@
 	@echo "BUILD C++ SOURCE  <=  $<"
 
-$(Enclave_Name): ./bin/Enclave_t.o $(Enclave_Cpp_Objects)
+$(Enclave_Name): ./bin/Enclave_t.o ./bin/Enclave.o
 	@$(CXX) $^ -o $@ $(Enclave_Link_Flags)
 	@echo "LINK =>  $@"
 
 .PHONY: clean
 
-clean: ./src/*.o ./src/Enclave_t.c
+clean: ./bin/*.o ./src/Enclave_t.c ./src/Enclave_t.h
 	@rm -rf ./src/*.o ./src/*_t.c /src/*_t.h ./bin/*.o
