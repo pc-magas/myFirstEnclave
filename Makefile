@@ -1,5 +1,5 @@
 SGX_SDK ?= /opt/intel/sgxsdk
-SGX_MODE ?= SIM
+SGX_MODE = SIM
 SGX_ARCH ?= x64
 
 ENCLAVE_SOURCE=./src
@@ -75,18 +75,7 @@ endif
 endif
 endif
 
-ifeq ($(Build_Mode), HW_RELEASE)
 all: $(Enclave_Name)
-	@echo "The project has been built in release hardware mode."
-	@echo "Please sign the $(Enclave_Name) first with your signing key before you run the $(App_Name) to launch and access the enclave."
-	@echo "To sign the enclave use the command:"
-	@echo "   $(SGX_ENCLAVE_SIGNER) sign -key <your key> -enclave $(Enclave_Name) -out <$(Signed_Enclave_Name)> -config $(Enclave_Config_File)"
-	@echo "You can also sign the enclave using an external signing tool. See User's Guide for more details."
-	@echo "To build the project in simulation mode set SGX_MODE=SIM. To build the project in prerelease mode set SGX_PRERELEASE=1 and SGX_MODE=HW."
-else
-all: $(Signed_Enclave_Name)
-endif
-
 
 ./src/Enclave_t.c: $(SGX_EDGER8R) ./src/Enclave.edl
 	@cd src && $(SGX_EDGER8R) --trusted ../src/Enclave.edl --search-path ../src --search-path $(SGX_SDK)/include
@@ -96,7 +85,7 @@ endif
 	@$(CC) $(Enclave_C_Flags) -c $< -o $@
 	@echo "CC   <=  $<"
 
-./bin/Enclave/%.o: ./src/%.cpp
+./bin/Enclave.o: ./src/%.cpp
 	@$(CXX) $(Enclave_Cpp_Flags) -c $< -o $@
 	@echo "CXX  <=  $<"
 
@@ -104,11 +93,7 @@ $(Enclave_Name): ./bin/Enclave_t.o $(Enclave_Cpp_Objects)
 	@$(CXX) $^ -o $@ $(Enclave_Link_Flags)
 	@echo "LINK =>  $@"
 
-$(Signed_Enclave_Name): $(Enclave_Name)
-	@$(SGX_ENCLAVE_SIGNER) sign -key Enclave/Enclave_private.pem -enclave $(Enclave_Name) -out $@ -config $(Enclave_Config_File)
-	@echo "SIGN =>  $@"
-
 .PHONY: clean
 
 clean: ./src/*.o ./src/Enclave_t.c
-	@rm -rf ./src/*.o ./src/*_t.c /src/*_t.h
+	@rm -rf ./src/*.o ./src/*_t.c /src/*_t.h ./bin/*.o
