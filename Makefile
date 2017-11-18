@@ -79,17 +79,17 @@ all: $(Enclave_Name)
 
 ./src/Enclave_t.c: $(SGX_EDGER8R) ./src/Enclave.edl
 	@cd src && $(SGX_EDGER8R) --trusted ../src/Enclave.edl --search-path ../src --search-path $(SGX_SDK)/include
-	@echo "GEN  =>  $@"
+	@echo "GENERETING EDGE FUNCTIONS  =>  $@"
 
 ./bin/Enclave_t.o: ./src/Enclave_t.c
 	@$(CC) $(Enclave_C_Flags) -c $< -o $@
-	@echo "CC   <=  $<"
+	@echo "BUILD EDGE FUNCTIONS   <=  $<"
 
 ./bin/Enclave.o: ./src/%.cpp
 	@$(CXX) $(Enclave_Cpp_Flags) -c $< -o $@
-	@echo "CXX  <=  $<"
+	@echo "BUILD C++ SOURCE  <=  $<"
 
-$(Enclave_Name): ./bin/Enclave_t.o $(Enclave_Cpp_Objects)
+$(Enclave_Name): $(Enclave_Cpp_Objects) ./bin/Enclave_t.o
 	@$(CXX) $^ -o $@ $(Enclave_Link_Flags)
 	@echo "LINK =>  $@"
 
