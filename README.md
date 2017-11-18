@@ -17,4 +17,4 @@ make
 
 As far I discovered the application you can compile an enclave by doing the following compile chain:
 
-![In what order to compile the files](https://cloud.disroot.org/s/CjiFFWZChuWBNIF)
+![In what order to compile the files](https://media.githubusercontent.com/media/pc-magas/myFirstEnclave/master/doc/SGX%20Compile%20workflow.png)
