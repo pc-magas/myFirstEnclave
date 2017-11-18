@@ -8,3 +8,4 @@ src/*_u.h
 *_t.h
 src/*.o
 bin/*.o
+bin/*.so
