@@ -88,13 +88,13 @@ all: $(Signed_Enclave_Name)
 endif
 
 
+./src/Enclave_t.c: $(SGX_EDGER8R) ./src/Enclave.edl
+	@cd src && $(SGX_EDGER8R) --trusted ../src/Enclave.edl --search-path ../src --search-path $(SGX_SDK)/include
+	@echo "GEN  =>  $@"
+
 ./bin/Enclave_t.o: ./src/Enclave_t.c
 	@$(CC) $(Enclave_C_Flags) -c $< -o $@
 	@echo "CC   <=  $<"
-
-./bin/Enclave_u.o: ./src/Enclave_u.c
-		@$(CC) $(Enclave_C_Flags) -c $< -o $@
-		@echo "CC   <=  $<"
 
 ./bin/Enclave/%.o: ./src/%.cpp
 	@$(CXX) $(Enclave_Cpp_Flags) -c $< -o $@
@@ -110,5 +110,5 @@ $(Signed_Enclave_Name): $(Enclave_Name)
 
 .PHONY: clean
 
-clean: ./src/*.o
-	@rm -rf ./src/*.o
+clean: ./src/*.o ./src/Enclave_t.c
+	@rm -rf ./src/*.o ./src/*_t.c /src/*_t.h
