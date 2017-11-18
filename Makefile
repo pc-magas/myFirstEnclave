@@ -89,7 +89,7 @@ all: $(Enclave_Name)
 	@$(CXX) $(Enclave_Cpp_Flags) -c $< -o $@
 	@echo "BUILD C++ SOURCE  <=  $<"
 
-$(Enclave_Name): $(Enclave_Cpp_Objects) ./bin/Enclave_t.o
+$(Enclave_Name): ./bin/Enclave_t.o $(Enclave_Cpp_Objects)
 	@$(CXX) $^ -o $@ $(Enclave_Link_Flags)
 	@echo "LINK =>  $@"
 
