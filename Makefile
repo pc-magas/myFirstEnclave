@@ -4,6 +4,9 @@ SGX_ARCH ?= x64
 
 ENCLAVE_SOURCE=./src
 
+KEY_STORAGE_PATH=~/.sgx
+KEY_FILE=$(KEY_STORAGE_PATH)/MyFirstEnclave.pem
+
 ifeq ($(shell getconf LONG_BIT), 32)
 	SGX_ARCH := x86
 else ifeq ($(findstring -m32, $(CXXFLAGS)), -m32)
@@ -75,7 +78,17 @@ endif
 endif
 endif
 
+ifeq ($(Build_Mode), HW_RELEASE)
 all: $(Enclave_Name)
+	@echo "The project has been built in release hardware mode."
+	@echo "Please sign the $(Enclave_Name) first with your signing key before you run the $(App_Name) to launch and access the enclave."
+	@echo "To sign the enclave use the command:"
+	@echo "   $(SGX_ENCLAVE_SIGNER) sign -key <your key> -enclave $(Enclave_Name) -out <$(Signed_Enclave_Name)> -config $(Enclave_Config_File)"
+	@echo "You can also sign the enclave using an external signing tool. See User's Guide for more details."
+	@echo "To build the project in simulation mode set SGX_MODE=SIM. To build the project in prerelease mode set SGX_PRERELEASE=1 and SGX_MODE=HW."
+else
+all: $(Signed_Enclave_Name)
+endif
 
 ./src/Enclave_t.c: $(SGX_EDGER8R) ./src/Enclave.edl
 	@cd src && $(SGX_EDGER8R) --trusted ../src/Enclave.edl --search-path ../src --search-path $(SGX_SDK)/include
@@ -92,6 +105,18 @@ all: $(Enclave_Name)
 $(Enclave_Name): ./bin/Enclave_t.o ./bin/Enclave.o
 	@$(CXX) $^ -o $@ $(Enclave_Link_Flags)
 	@echo "LINK =>  $@"
+
+$(KEY_STORAGE_PATH):
+	@mkdir -p $(KEY_STORAGE_PATH)
+	@echo "Genberating Key sotrage Directory => $(KEY_STORAGE_PATH)"
+
+$(KEY_FILE): $(KEY_STORAGE_PATH)
+	@openssl genrsa -out $(KEY_FILE) 2048
+	@echo "Generating key file => $(KEY_FILE)"
+
+$(Signed_Enclave_Name): $(KEY_FILE) $(Enclave_Name)
+	@$(SGX_ENCLAVE_SIGNER) sign -key $(KEY_FILE) -enclave $(Enclave_Name) -out $@ -config $(Enclave_Config_File)
+	@echo "SIGN =>  $@"
 
 .PHONY: clean
 
