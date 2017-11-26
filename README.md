@@ -27,3 +27,10 @@ Variable | Use
 As far I discovered the application you can compile an enclave by doing the following compile chain:
 
 ![In what order to compile the files](https://media.githubusercontent.com/media/pc-magas/myFirstEnclave/master/doc/SGX%20Compile%20workflow.png)
+
+
+## Requirements
+
+* A GNU\Linux Distribution with the [sgx driver](https://github.com/01org/linux-sgx-driver) and the [sdk & psw libraries](https://github.com/01org/linux-sgx)
+* The `gcc` , `g++`, `make` and `openssl` tools.
+* [Git lfs](https://git-lfs.github.com/) for documentation (optionally)
