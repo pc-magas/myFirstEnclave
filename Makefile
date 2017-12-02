@@ -4,8 +4,9 @@ SGX_ARCH ?= x64
 
 ENCLAVE_SOURCE=./src
 
-KEY_STORAGE_PATH=~/.sgx
-KEY_FILE=$(KEY_STORAGE_PATH)/MyFirstEnclave.pem
+KEY_FILE=./keys/Enclave_private.pem
+
+SGX_HEX=./bin/MyFirstEnclave.hex
 
 ifeq ($(shell getconf LONG_BIT), 32)
 	SGX_ARCH := x86
@@ -92,7 +93,7 @@ endif
 
 ./src/Enclave_t.c: $(SGX_EDGER8R) ./src/Enclave.edl
 	@cd src && $(SGX_EDGER8R) --trusted ../src/Enclave.edl --search-path ../src --search-path $(SGX_SDK)/include
-	@echo "GENERETING EDGE FUNCTIONS  =>  $@"
+	@echo "GENERATING EDGE FUNCTIONS  =>  $@"
 
 ./bin/Enclave_t.o: ./src/Enclave_t.c
 	@$(CC) $(Enclave_C_Flags) -c $< -o $@
@@ -108,11 +109,8 @@ $(Enclave_Name): ./bin/Enclave_t.o ./bin/Enclave.o
 
 $(KEY_STORAGE_PATH):
 	@mkdir -p $(KEY_STORAGE_PATH)
-	@echo "Genberating Key sotrage Directory => $(KEY_STORAGE_PATH)"
+	@echo "Generating Key sotrage Directory => $(KEY_STORAGE_PATH)"
 
-$(KEY_FILE): $(KEY_STORAGE_PATH)
-	@openssl genrsa -out $(KEY_FILE) 2048
-	@echo "Generating key file => $(KEY_FILE)"
 
 $(Signed_Enclave_Name): $(KEY_FILE) $(Enclave_Name)
 	@$(SGX_ENCLAVE_SIGNER) sign -key $(KEY_FILE) -enclave $(Enclave_Name) -out $@ -config $(Enclave_Config_File)
