@@ -33,5 +33,6 @@ As far I discovered the application you can compile an enclave by doing the foll
 ## Requirements
 
 * A GNU\Linux Distribution with the [sgx driver](https://github.com/01org/linux-sgx-driver) and the [sdk & psw libraries](https://github.com/01org/linux-sgx)
+* As mentioned on the links above to export the correct source.
 * The `gcc` , `g++`, `make` and `openssl` tools.
 * [Git lfs](https://git-lfs.github.com/) for documentation (optionally)
