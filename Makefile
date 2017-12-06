@@ -4,7 +4,9 @@ SGX_ARCH ?= x64
 
 ENCLAVE_SOURCE=./src
 
-KEY_FILE=./keys/Enclave_private.pem
+KEY_STORAGE_PATH ?= ~/.sgx
+KEY_PRIVATE_FILE=$(KEY_STORAGE_PATH)/MyFirstEnclave_private.pem
+KEY_PUBLIC_FILE=$(KEY_STORAGE_PATH)/MyFirstEnclave_public.pem
 
 SGX_HEX=./bin/MyFirstEnclave.hex
 
@@ -109,12 +111,19 @@ $(Enclave_Name): ./bin/Enclave_t.o ./bin/Enclave.o
 
 $(KEY_STORAGE_PATH):
 	@mkdir -p $(KEY_STORAGE_PATH)
-	@echo "Generating Key sotrage Directory => $(KEY_STORAGE_PATH)"
+	@echo "Generating Key storage Directory => $(KEY_STORAGE_PATH)"
 
+$(KEY_PRIVATE_FILE): $(KEY_STORAGE_PATH)
+	@openssl genrsa -out $(KEY_PRIVATE_FILE) -3 3072
+	@echo "Generating the private key => $(KEY_PRIVATE_FILE)"
 
-$(Signed_Enclave_Name): $(KEY_FILE) $(Enclave_Name)
-	@$(SGX_ENCLAVE_SIGNER) sign -key $(KEY_FILE) -enclave $(Enclave_Name) -out $@ -config $(Enclave_Config_File)
-	@echo "SIGN =>  $@"
+$(KEY_PUBLIC_FILE): $(KEY_PRIVATE_FILE)
+	@openssl rsa -in $(KEY_PRIVATE_FILE) -pubout -out $(KEY_PUBLIC_FILE)
+	@echo "Generating the public key => $(KEY_PUBLIC_FILE)"
+
+$(Signed_Enclave_Name): $(KEY_PUBLIC_FILE) $(Enclave_Name)
+	@$(SGX_ENCLAVE_SIGNER) sign -key $(KEY_PRIVATE_FILE) -enclave $(Enclave_Name) -out $@ -config $(Enclave_Config_File)
+	@echo "SIGNING THE ENCLAVE =>  $@"
 
 .PHONY: clean
 

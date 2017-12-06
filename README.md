@@ -15,12 +15,13 @@ make
 
 ### Key generation for enclave signing:
 
-The makefile generates the keys for enclave signing in `~/.sgx` directory. By default it will generate the `~/.sgx/MyFirstEnclave.pem` key. You can modify the path where the key will be stored by modifying the `KEY_STORAGE_PATH` and `KEY_FILE` accorditly. The following table explains the valies of the variables.
+The makefile generates the keys for enclave signing in `~/.sgx` directory. By default it will generate the `~/.sgx/MyFirstEnclave.pem` key. You can modify the path where the key will be stored by modifying the `KEY_STORAGE_PATH` and `KEY_PRIVATE_FILE` and `KEY_PUBLIC_FILE` accorditly. The following table explains the valies of the variables.
 
 Variable | Use
 --- | ---
 `KEY_STORAGE_PATH` | The directory where the keys will be stored.
-`KEY_FILE` | The file where the key will be generated.
+`KEY_PRIVATE_FILE` | The private key that will be generated and will be used to sign the enclave.
+`KEY_PUBLIC_FILE` | The public key that will be used from others to verify the signed enclave.
 
 ### The `Makefile` in Simple terms
 
