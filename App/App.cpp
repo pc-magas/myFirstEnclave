@@ -7,7 +7,7 @@
 sgx_enclave_id_t global_eid = 0;
 
 int main(int argc, char const *argv[]) {
-    if (initialize_enclave(&global_eid, "enclave.token", "enclave.signed.so") < 0) {
+    if (initialize_enclave(&global_eid, "enclave.token", "./bin/enclave.signed.so") < 0) {
         std::cerr << "Fail to initialize enclave." << std::endl;
         return 1;
     }
