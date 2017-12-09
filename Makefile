@@ -1,8 +1,6 @@
 SGX_SDK ?= /opt/intel/sgxsdk
-SGX_MODE = SIM
+SGX_MODE ?= SIM
 SGX_ARCH ?= x64
-
-ENCLAVE_SOURCE=./src
 
 KEY_STORAGE_PATH ?= ~/.sgx
 KEY_PRIVATE_FILE=$(KEY_STORAGE_PATH)/MyFirstEnclave_private.pem
@@ -50,8 +48,50 @@ else
 endif
 Crypto_Library_Name := sgx_tcrypto
 
+######## App Settings ########
 
-Enclave_Cpp_Files := ./src/Enclave.cpp
+ifneq ($(SGX_MODE), HW)
+	Urts_Library_Name := sgx_urts_sim
+else
+	Urts_Library_Name := sgx_urts
+endif
+
+# App_Cpp_Files := App/App.cpp $(wildcard App/Edger8rSyntax/*.cpp) $(wildcard App/TrustedLibrary/*.cpp)
+App_Cpp_Files := App/App.cpp App/sgx_utils/sgx_utils.cpp
+# App_Include_Paths := -IInclude -IApp -I$(SGX_SDK)/include
+App_Include_Paths := -IApp -I$(SGX_SDK)/include
+
+App_C_Flags := $(SGX_COMMON_CFLAGS) -fPIC -Wno-attributes $(App_Include_Paths)
+
+# Three configuration modes - Debug, prerelease, release
+#   Debug - Macro DEBUG enabled.
+#   Prerelease - Macro NDEBUG and EDEBUG enabled.
+#   Release - Macro NDEBUG enabled.
+ifeq ($(SGX_DEBUG), 1)
+		App_C_Flags += -DDEBUG -UNDEBUG -UEDEBUG
+else ifeq ($(SGX_PRERELEASE), 1)
+		App_C_Flags += -DNDEBUG -DEDEBUG -UDEBUG
+else
+		App_C_Flags += -DNDEBUG -UEDEBUG -UDEBUG
+endif
+
+App_Cpp_Flags := $(App_C_Flags) -std=c++11
+App_Link_Flags := $(SGX_COMMON_CFLAGS) -L$(SGX_LIBRARY_PATH) -l$(Urts_Library_Name) -lpthread
+
+ifneq ($(SGX_MODE), HW)
+	App_Link_Flags += -lsgx_uae_service_sim
+else
+	App_Link_Flags += -lsgx_uae_service
+endif
+
+App_Cpp_Objects := $(App_Cpp_Files:.cpp=.o)
+
+App_Name := app
+
+######## Enclave Settings ########
+
+
+Enclave_Cpp_Files := ./Enclave/Enclave.cpp
 
 # Enclave_Include_Paths := -IInclude -IEnclave -I$(SGX_SDK)/include -I$(SGX_SDK)/include/tlibc -I$(SGX_SDK)/include/stlport
 Enclave_Include_Paths := -IEnclave -I$(SGX_SDK)/include -I$(SGX_SDK)/include/tlibc -I$(SGX_SDK)/include/stlport
@@ -68,7 +108,6 @@ Enclave_Link_Flags := $(SGX_COMMON_CFLAGS) -Wl,--no-undefined -nostdlib -nodefau
 
 Enclave_Cpp_Objects := $(Enclave_Cpp_Files:.cpp=.o)
 
-# Investigate them furher
 Enclave_Name := ./bin/enclave.so
 Signed_Enclave_Name := ./bin/enclave.signed.so
 Enclave_Config_File := ./bin/Enclave.config.xml
@@ -82,7 +121,7 @@ endif
 endif
 
 ifeq ($(Build_Mode), HW_RELEASE)
-all: $(Enclave_Name)
+all: $(Enclave_Name) $(App_Name)
 	@echo "The project has been built in release hardware mode."
 	@echo "Please sign the $(Enclave_Name) first with your signing key before you run the $(App_Name) to launch and access the enclave."
 	@echo "To sign the enclave use the command:"
@@ -90,18 +129,39 @@ all: $(Enclave_Name)
 	@echo "You can also sign the enclave using an external signing tool. See User's Guide for more details."
 	@echo "To build the project in simulation mode set SGX_MODE=SIM. To build the project in prerelease mode set SGX_PRERELEASE=1 and SGX_MODE=HW."
 else
-all: $(Signed_Enclave_Name)
+all: $(Signed_Enclave_Name)  $(App_Name)
 endif
 
-./src/Enclave_t.c: $(SGX_EDGER8R) ./src/Enclave.edl
-	@cd src && $(SGX_EDGER8R) --trusted ../src/Enclave.edl --search-path ../src --search-path $(SGX_SDK)/include
+######################## Application build steps ##########################
+
+App/Enclave_u.c: $(SGX_EDGER8R) Enclave/Enclave.edl
+	@cd App && $(SGX_EDGER8R) --untrusted ../Enclave/Enclave.edl --search-path ../Enclave --search-path $(SGX_SDK)/include
+	@echo "Generating App's untrusted functions  =>  $@"
+
+App/Enclave_u.o: App/Enclave_u.c
+	@$(CC) $(App_C_Flags) -c $< -o $@
+	@echo "Compile apps untrusted functions   <=  $<"
+
+
+App/%.o: App/%.cpp
+	@$(CXX) $(App_Cpp_Flags) -c $< -o $@
+	@echo "Compile the App  <=  $<"
+
+$(App_Name): App/Enclave_u.o $(App_Cpp_Objects)
+	@$(CXX) $^ -o $@ $(App_Link_Flags)
+	@echo "LINK =>  $@"
+
+####################### Enclave build Steps ###############################
+
+./Enclave/Enclave_t.c: $(SGX_EDGER8R) ./Enclave/Enclave.edl
+	@cd Enclave && $(SGX_EDGER8R) --trusted ../Enclave/Enclave.edl --search-path ../Enclave --search-path $(SGX_SDK)/include
 	@echo "GENERATING EDGE FUNCTIONS  =>  $@"
 
-./bin/Enclave_t.o: ./src/Enclave_t.c
+./bin/Enclave_t.o: ./Enclave/Enclave_t.c
 	@$(CC) $(Enclave_C_Flags) -c $< -o $@
 	@echo "BUILD EDGE FUNCTIONS   <=  $<"
 
-./bin/Enclave.o: ./src/Enclave.cpp
+./bin/Enclave.o: ./Enclave/Enclave.cpp
 	@$(CXX) $(Enclave_Cpp_Flags) -c $< -o $@
 	@echo "BUILD C++ SOURCE  <=  $<"
 
@@ -127,5 +187,5 @@ $(Signed_Enclave_Name): $(KEY_PUBLIC_FILE) $(Enclave_Name)
 
 .PHONY: clean
 
-clean: ./bin/*.o ./src/Enclave_t.c ./src/Enclave_t.h
-	@rm -rf ./src/*.o ./src/*_t.c /src/*_t.h ./bin/*.o
+clean: ./bin/*.o ./Enclave/Enclave_t.c ./Enclave/Enclave_t.h
+	@rm -rf ./Enclave/*.o ./Enclave/*_t.c /Enclave/*_t.h ./bin/*.o

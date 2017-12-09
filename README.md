@@ -3,6 +3,11 @@
 This is my first enclave for testing and educational purpoce.
 It is supposed to generate a library that does a simple adding into an intel SGX environment.
 
+This repo contains 2 branches:
+
+* The `enclave_only` branch that shows only how an enclave is built and signed.
+* The `master` branch that contains the how build sign and link your enclave with an application.
+
 ## Compile
 
 ### How to Compile
