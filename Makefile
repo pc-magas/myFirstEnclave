@@ -186,5 +186,5 @@ $(Signed_Enclave_Name): $(KEY_PUBLIC_FILE) $(Enclave_Name)
 
 .PHONY: clean
 
-clean: ./bin/*.o ./Enclave/Enclave_t.c ./Enclave/Enclave_t.h
-	@rm -rf ./Enclave/*.o ./Enclave/*_t.c /Enclave/*_t.h ./bin/*.o ./App/*.o ./App/Enclave_u.c ./App/Enclave_u.o
+clean:
+	@rm -rf ./Enclave/*.o ./Enclave/*_t.c /Enclave/*_t.h ./bin/*.o ./App/*.o ./App/*/*.o ./App/Enclave_u.c ./App/Enclave_u.o
