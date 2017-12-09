@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <cstring>
+#include <errno.h>
 #include "sgx_urts.h"
 #include "sgx_utils.h"
 
@@ -13,7 +14,7 @@
 
 /* Check error conditions for loading enclave */
 void print_error_message(sgx_status_t ret) {
-    printf("SGX error code: %d\n", ret);
+    fprintf(stderr,"SGX error code: 0x%08x\n", ret);
 }
 
 /* Initialize the enclave:
