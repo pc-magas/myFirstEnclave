@@ -6,6 +6,6 @@ src/*_u.h
 *_u.h
 *_t.c
 *_t.h
-src/*.o
+App/*.o
 bin/*.o
 bin/*.so
