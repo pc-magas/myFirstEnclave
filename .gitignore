@@ -9,3 +9,5 @@ src/*_u.h
 App/*.o
 bin/*.o
 bin/*.so
+app
+enclave.token
