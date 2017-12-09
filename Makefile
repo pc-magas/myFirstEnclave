@@ -93,7 +93,6 @@ App_Name := app
 
 Enclave_Cpp_Files := ./Enclave/Enclave.cpp
 
-# Enclave_Include_Paths := -IInclude -IEnclave -I$(SGX_SDK)/include -I$(SGX_SDK)/include/tlibc -I$(SGX_SDK)/include/stlport
 Enclave_Include_Paths := -IEnclave -I$(SGX_SDK)/include -I$(SGX_SDK)/include/tlibc -I$(SGX_SDK)/include/stlport
 
 Enclave_C_Flags := $(SGX_COMMON_CFLAGS) -nostdinc -fvisibility=hidden -fpie -fstack-protector $(Enclave_Include_Paths)
@@ -149,7 +148,7 @@ App/%.o: App/%.cpp
 
 $(App_Name): App/Enclave_u.o $(App_Cpp_Objects)
 	@$(CXX) $^ -o $@ $(App_Link_Flags)
-	@echo "LINK =>  $@"
+	@echo "LINKING ALL THE BINARIES =>  $@"
 
 ####################### Enclave build Steps ###############################
 
